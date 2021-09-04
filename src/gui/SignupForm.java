@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -9,14 +10,21 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.Format;
 import java.text.Normalizer.Form;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,9 +32,32 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import tools.Notification;
+import users.CurrentUsers;
+import users.User;
+
+import java.util.Calendar;
+import java.util.Date;
+
 public class SignupForm extends JFrame{
 	
 	String path = "src/gui/icons/";
+	JTextField pAddress;
+	JTextField firsName;
+	JTextField lastName;
+	JTextField fathersName;
+	JTextField mothersName;
+	JTextField address;
+	JTextField nidField;
+	JTextField mobileField;
+	JTextField tinField;
+	JTextField dateTextField;
+	
+	JRadioButton maleButton;
+	JRadioButton femaleButton;
+	JRadioButton customButton;
+	
+	JLabel sexLabel;
 	
 	public SignupForm() {
 		setTitle("Abstract Bank | Signup");
@@ -78,7 +109,7 @@ public class SignupForm extends JFrame{
 				+ "</font>"
 				+ "</html>");
 		
-		JTextField firsName = new JTextField(30);
+		firsName = new JTextField(CurrentUsers.currentTempUser.getfName(), 30);
 		firsName.setFont(new Font("Consolas", Font.BOLD, 15));
 		JLabel firstNameLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
@@ -86,7 +117,7 @@ public class SignupForm extends JFrame{
 				+ "</font>"
 				+ "</html>");
 		
-		JTextField lastName = new JTextField(30);
+		lastName = new JTextField(CurrentUsers.currentTempUser.getlName(), 30);
 		lastName.setFont(new Font("Consolas", Font.BOLD, 15));
 		JLabel lastNameLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
@@ -94,7 +125,7 @@ public class SignupForm extends JFrame{
 				+ "</font>"
 				+ "</html>");
 		
-		JTextField fathersName = new JTextField(30);
+		fathersName = new JTextField(CurrentUsers.currentTempUser.getFatherName(), 30);
 		fathersName.setFont(new Font("Consolas", Font.BOLD, 15));
 		JLabel fathersNameLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
@@ -102,7 +133,7 @@ public class SignupForm extends JFrame{
 				+ "</font>"
 				+ "</html>");
 		
-		JTextField mothersName = new JTextField(30);
+		mothersName = new JTextField(CurrentUsers.currentTempUser.getMothername(), 30);
 		mothersName.setFont(new Font("Consolas", Font.BOLD, 15));
 		JLabel mothersNameLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
@@ -111,36 +142,42 @@ public class SignupForm extends JFrame{
 				+ "</html>");
 		
 		
-		JRadioButton maleButton = new JRadioButton("<html>"
+		maleButton = new JRadioButton("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "Male"
 				+ "</font>"
 				+ "</html>");
 		maleButton.setOpaque(false);
-		JRadioButton femaleButton = new JRadioButton("<html>"
+		femaleButton = new JRadioButton("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "Female"
 				+ "</font>"
 				+ "</html>");
 		femaleButton.setOpaque(false);
-		JRadioButton customGender = new JRadioButton("<html>"
+		customButton = new JRadioButton("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "Custom"
 				+ "</font>"
 				+ "</html>");
-		customGender.setOpaque(false);
-		JLabel sexLabel = new JLabel("<html>"
+		customButton.setOpaque(false);
+		sexLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "<br>Sex"
 				+ "</font>"
 				+ "</html>");
 		ButtonGroup sexButtons = new ButtonGroup();
+		
+		if(CurrentUsers.currentTempUser.getSex().equals("Male")) maleButton.setSelected(true);
+		else if(CurrentUsers.currentTempUser.getSex().equals("Female")) femaleButton.setSelected(true);
+		else if(CurrentUsers.currentTempUser.getSex().equals("Custom")) customButton.setSelected(true);
+		
 		sexButtons.add(maleButton);
 		sexButtons.add(femaleButton);
-		sexButtons.add(customGender);
+		sexButtons.add(customButton);
 		
 		
-		JTextArea address = new JTextArea(3, 22);
+		address = new JTextField(CurrentUsers.currentTempUser.getpAddress());
+		address.setFont(new Font("Consolas", Font.BOLD, 10));
 		JLabel addressLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "<br>Present Address"
@@ -159,7 +196,7 @@ public class SignupForm extends JFrame{
 		formPanel1.add(sexLabel);
 		formPanel1.add(maleButton);
 		formPanel1.add(femaleButton);
-		formPanel1.add(customGender);
+		formPanel1.add(customButton);
 		formPanel1.add(addressLabel);
 		formPanel1.add(address);
 		
@@ -174,33 +211,46 @@ public class SignupForm extends JFrame{
 				+ "</font>"
 				+ "</html>");
 		
-		JTextField nidField = new JTextField(25);
+		nidField = new JTextField(CurrentUsers.currentTempUser.getNid(), 25);
+		nidField.setFont(new Font("Consolas", Font.BOLD, 15));
 		JLabel nidLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "<br>NID Number"
 				+ "</font>"
 				+ "</html>");
 		
-		JTextField mobileField = new JTextField(25);
+		mobileField = new JTextField(CurrentUsers.currentTempUser.getMobile(), 25);
+		mobileField.setFont(new Font("Consolas", Font.BOLD, 15));
 		JLabel mobileLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "<br>Mobile Number"
 				+ "</font>"
 				+ "</html>");
 		
-		JTextField tinField = new JTextField(25);
+		tinField = new JTextField(CurrentUsers.currentTempUser.getTin(), 25);
+		tinField.setFont(new Font("Consolas", Font.BOLD, 15));
 		JLabel tinLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "<br>TIN"
 				+ "</font>"
 				+ "</html>");
 		
-		JTextField dobField = new JTextField(25);
+		String tempDateString;
+		try {
+			SimpleDateFormat format =  new SimpleDateFormat("dd/mm/yyyy");
+			tempDateString = format.format(CurrentUsers.currentTempUser.getDate());
+		}catch(Exception e) {
+			tempDateString = "";
+		}
+		
+		dateTextField = new JTextField(tempDateString, 25);
+		dateTextField.setFont(new Font("Consolas", Font.BOLD, 15));
 		JLabel dobLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
-				+ "<br>Date of Birth"
+				+ "<br>Date of Birth (dd/mm/yyyy)"
 				+ "</font>"
 				+ "</html>");
+						
 		
 		
 		JCheckBox sameAsPresent = new JCheckBox("<html>"
@@ -210,7 +260,8 @@ public class SignupForm extends JFrame{
 				+ "</html>");
 		sameAsPresent.setOpaque(false);
 		sameAsPresent.setFocusable(false);
- 		JTextArea pAddress = new JTextArea(4, 22);
+		pAddress = new JTextField(CurrentUsers.currentTempUser.getPermanentAddress());
+		pAddress.setFont(new Font("Consolas", Font.BOLD, 10));
 		JLabel PAddressLabel = new JLabel("<html>"
 				+ "<font size='3' color='#588FAD' face='Consolas'>"
 				+ "<br>Permanent Address<sup>~</sup>"
@@ -242,7 +293,7 @@ public class SignupForm extends JFrame{
 		formPanel2.add(tinLabel);
 		formPanel2.add(tinField);
 		formPanel2.add(dobLabel);
-		formPanel2.add(dobField);
+		formPanel2.add(dateTextField);
 		formPanel2.add(PAddressLabel);
 		formPanel2.add(sameAsPresent);
 		formPanel2.add(pAddress);
@@ -253,16 +304,193 @@ public class SignupForm extends JFrame{
 		
 					// listeners
 		
-		login.addActionListener(new ActionListener() {
+		login.addActionListener(new ActionListener() {			// login
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dispose();
-				new LoginForm();
+				if(Notification.yesNoConfirmation(rootPane, "Are you sure to go back?", "Resubmission") == 0) {
+					dispose();
+					new LoginForm();
+				}
+			}
+		});
+		
+		
+		Continue.addActionListener(new ActionListener() {		// continue
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if(checkFields()) {
+					dispose();
+					new SignupContinueForm();
+				}
+			}
+		});
+		
+		
+		sameAsPresent.addActionListener(new ActionListener() {		// same as present address
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(sameAsPresent.isSelected()) {
+					pAddress.setText(address.getText());
+				}else {
+					pAddress.setText("");
+				}
 				
 			}
 		});
 		
+		
+		
+		
+		
 		setVisible(true);
+	}
+	
+	public boolean checkFields() {
+		String fName = firsName.getText();
+		 String lName = lastName.getText();
+		 String fatherName = fathersName.getText();
+		 String mothername = mothersName.getText();
+		 String sex = "";
+		 if(maleButton.isSelected()) sex = "Male";
+		 else if(femaleButton.isSelected()) sex = "Female";
+		 else if(customButton.isSelected()) sex = "Custom";
+		 String presentAddress = address.getText();
+		 String permanentAddress = pAddress.getText();
+		 String nid = nidField.getText();
+		 String mobile = mobileField.getText();
+		 String tin = tinField.getText();
+		 Date date = null;
+		 
+		 boolean isAnyFieldEmpty = false;
+		 
+		 try {
+			 date = new SimpleDateFormat("dd/mm/yyyy").parse(dateTextField.getText());
+			 setBorderGreen(dateTextField);
+		 } catch (ParseException e1) {
+			 setBorderRed(dateTextField);
+			 isAnyFieldEmpty = true;
+		 }
+		 
+		//|| lName.isEmpty() || fatherName.isEmpty() || mothername.isEmpty() || presentAddress.isEmpty() || mothername.isEmpty())
+		 
+		 if(fName.isEmpty()) {
+			 setBorderRed(firsName);
+			 isAnyFieldEmpty = true;
+		 }
+		 else {
+			 setBorderGreen(firsName);
+		 }
+		 
+		 if(lName.isEmpty()) {
+			 setBorderRed(lastName);
+			 isAnyFieldEmpty = true;
+		 }
+		 else {
+			 setBorderGreen(lastName);
+		 }
+		 
+		 if(fatherName.isEmpty()) {
+			 setBorderRed(fathersName);
+			 isAnyFieldEmpty = true;
+		 }
+		 else {
+			 setBorderGreen(fathersName);
+		 }
+		 
+		 if(mothername.isEmpty()) {
+			 setBorderRed(mothersName);
+			 isAnyFieldEmpty = true;
+		 }
+		 else {
+			 setBorderGreen(mothersName);
+		 }
+		 
+		 if(presentAddress.isEmpty()) {
+			 setBorderRed(address);
+			 isAnyFieldEmpty = true;
+		 }
+		 else {
+			 setBorderGreen(address);
+		 }
+		 
+		 if(permanentAddress.isEmpty()) {
+			 setBorderRed(pAddress);
+			 isAnyFieldEmpty = true;
+		 }
+		 else {
+			 setBorderGreen(pAddress);
+		 }
+		 
+		 if(nid.isEmpty() || checkAlpha(nid)) {
+			 setBorderRed(nidField);
+			 isAnyFieldEmpty = true;
+		 }
+		 else {
+			 setBorderGreen(nidField);
+		 }
+		 
+		 if(tin.isEmpty() || checkAlpha(tin)) {
+			 setBorderRed(tinField);
+			 isAnyFieldEmpty = true;
+		 }
+		 else {
+			 setBorderGreen(tinField);
+		 }
+		 
+		 if(mobile.isEmpty() || checkAlpha(mobile)) {
+			 setBorderRed(mobileField);
+			 isAnyFieldEmpty = true;
+		 }else {
+			 setBorderGreen(mobileField);
+		 }
+		
+		
+		if(maleButton.isSelected() || femaleButton.isSelected() || customButton.isSelected()) {
+			sexLabel.setText("<html>"
+				+ "<font size='3' color='#49B232' face='Consolas'>"
+				+ "Sex"
+				+ "</font>"
+				+ "</html>");
+		}else {
+			sexLabel.setText("<html>"
+					+ "<font size='3' color='#D02038' face='Consolas'>"
+					+ "Sex"
+					+ "</font>"
+					+ "</html>");
+			isAnyFieldEmpty = true;
+		}
+		 
+		 
+		
+		if (isAnyFieldEmpty) {
+			Notification.okConfirmation(rootPane, "Field cannot be empty or invalid information", "Error");
+			return false;
+		}
+		 
+		User tempUser;
+		tempUser = new User(fName, lName, fatherName, mothername, sex,  presentAddress,
+					permanentAddress, nid, mobile, tin, date, false );
+		CurrentUsers.currentTempUser = tempUser;
+		return true;
+		 
+	}
+	
+	private void setBorderRed(JComponent c) {
+		c.setBorder(BorderFactory.createLineBorder(Color.RED, 1));
+	}
+	private void setBorderGreen(JComponent c) {
+		c.setBorder(BorderFactory.createLineBorder(Color.GREEN, 1));
+	}
+	
+	private boolean checkAlpha(String str) {
+		byte chars[] = str.getBytes();
+		for(int i : chars) {
+			if(i < 48 || i > 57) return true;
+		}
+		return false;
 	}
 }

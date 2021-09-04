@@ -27,6 +27,9 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 
+import Database.Database;
+import users.CurrentUsers;
+
 public class LoginForm extends JFrame implements ActionListener{
 	
 	String path = "src/gui/icons/";
@@ -292,6 +295,18 @@ public class LoginForm extends JFrame implements ActionListener{
 				dispose();
 				new SignupForm();
 				
+			}
+		});
+		
+		loginButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String username = usernameField.getText();
+				String password = new String(passwordField.getPassword());
+				
+				boolean loginConfirmation = Database.loginVerification(username, password);
+				CurrentUsers.currentUser = Database.getUser(username);
 			}
 		});
 
